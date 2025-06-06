@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center">
+  <h1 class="display-5">📚 Welcome to the Book Bank System</h1>
+  <p class="lead mt-3">Manage your book loans easily and efficiently.</p>
+ <p style="margin-top: 10px; font-size: 14px; color: #555;">
+    <em>By Amine Mimoun & Nathanael Wachira</em>
+</p>
+  <hr class="my-4">
+  {% if user %}
+    <p>Hello <strong>{{ user.name }}</strong>! You can borrow or return books using the menu above.</p>
+    <a class="btn btn-primary btn-lg" href="/borrow">Borrow a Book</a>
+    <a class="btn btn-warning btn-lg" href="/return">Return a Book</a>
+  {% elif session.get('librarian') %}
+    <p>Welcome librarian. Use the top menu to manage books or view student borrow records.</p>
+    <a class="btn btn-dark btn-lg" href="/librarian/dashboard">Go to Dashboard</a>
+  {% else %}
+    <p>Please login or register to access the book system.</p>
+    <a class="btn btn-success btn-lg me-2" href="/login">Student Login</a>
+    <a class="btn btn-outline-secondary btn-lg" href="/register">Register</a>
+    <div class="mt-3">
+      <a class="btn btn-outline-dark btn-sm" href="/librarian/login">Librarian Login</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
