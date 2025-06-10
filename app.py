@@ -277,4 +277,5 @@ def verify_otp():
     return render_template("verify_otp.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.environ.get("FLASK_ENV") == "development"
+    app.run(debug=debug_mode)
