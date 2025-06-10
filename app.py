@@ -135,7 +135,9 @@ def borrow():
     conn = sqlite3.connect(DB, timeout=5)
     cursor = conn.cursor()
     if request.method == "POST":
-        student_id = session["user"]["id"]
+        email = session["user"]
+        cursor.execute("SELECT id FROM students WHERE email = ?", (email,))
+        student_id = cursor.fetchone()[0]
         book_id = int(request.form["book_id"])
         cursor.execute("SELECT available FROM books WHERE id = ?", (book_id,))
         book = cursor.fetchone()
@@ -160,7 +162,9 @@ def return_book():
 
     conn = sqlite3.connect(DB, timeout=5)
     cursor = conn.cursor()
-    student_id = session["user"]["id"]
+    cursor.execute("SELECT id FROM students WHERE email = ?", (email,))
+    student_id = cursor.fetchone()[0]
+
 
     if request.method == "POST":
         borrow_id = int(request.form["borrow_id"])
