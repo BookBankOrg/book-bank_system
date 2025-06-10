@@ -7,6 +7,9 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Initialisation Flask
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -59,8 +62,8 @@ Thank you,
 
 
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 def get_books():
     conn = sqlite3.connect(DB, timeout=5)
