@@ -6,7 +6,11 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"  
+    directory: "/"  # Le fichier requirements.txt est à la racine
     schedule:
-      interval: "daily"
+      interval: "daily" 
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "all"
+
 
