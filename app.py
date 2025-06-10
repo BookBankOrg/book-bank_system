@@ -162,6 +162,7 @@ def return_book():
 
     conn = sqlite3.connect(DB, timeout=5)
     cursor = conn.cursor()
+    email = session["user"]
     cursor.execute("SELECT id FROM students WHERE email = ?", (email,))
     student_id = cursor.fetchone()[0]
 
