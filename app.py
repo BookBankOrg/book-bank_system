@@ -28,8 +28,11 @@ app.config['MAIL_DEFAULT_SENDER'] = 'wachiranathanael7@gmail.com'
 
 mail = Mail(app)
 
+import secrets
+
 def generate_otp():
-    return str(random.randint(100000, 999999))
+    return str(secrets.randbelow(899999) + 100000)  # Modif
+
 
 def send_otp(email, otp):
     msg = Message(
