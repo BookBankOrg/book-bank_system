@@ -1,17 +1,60 @@
-
 from datetime import date
 import os
-basedir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(basedir, 'book_bank.db')
-
-from flask import Flask, render_template, request, redirect, session, url_for, flash
 import sqlite3
+import random
 from datetime import datetime
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
 
+# Initialisation Flask
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+
+# Config base de données
+basedir = os.path.abspath(os.path.dirname(__file__))
+db_path = os.path.join(basedir, 'book_bank.db')
 DB = "book_bank.db"
+
+# Config mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'wachiranathanael7@gmail.com'
+app.config['MAIL_PASSWORD'] = 'rkeymznwntobxbbe'
+
+app.config['MAIL_DEFAULT_SENDER'] = 'wachiranathanael7@gmail.com'
+
+
+mail = Mail(app)
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def send_otp(email, otp):
+    msg = Message(
+        subject='🔐 Book Bank - OTP Verification Code',
+        sender='wachiranathanael7@gmail.com',
+        recipients=[email]
+    )
+    msg.body = f"""\
+Hello,
+
+Your One-Time Password (OTP) to access the Book Bank System is:
+
+🔢 {otp}
+
+Please enter this code within the next 10 minutes to complete your login.
+
+If you did not request this code, please ignore this email.
+
+Thank you,  
+📚 Book Bank System  
+👨‍💻 Developed by Amine Mimoun & Nathanael Wachira
+"""
+    mail.send(msg)
+
+
 
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
@@ -49,24 +92,31 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html")
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
-        conn = sqlite3.connect(DB, timeout=5)
+
+        conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM students WHERE email = ?", (email,))
         user = cursor.fetchone()
         conn.close()
+
+        # Assure-toi de vérifier contre user[4], qui est le mot de passe
         if user and check_password_hash(user[4], password):
-            session["user"] = {"id": user[0], "name": user[1], "email": user[3]}
-            flash("Login successful", "success")
-            return redirect(url_for("index"))
+            otp = generate_otp()
+            session["pending_user"] = email
+            session["otp"] = otp
+            send_otp(email, otp)
+            return redirect(url_for("verify_otp"))
         else:
-            flash("Incorrect email or password", "error")
-            return redirect(url_for("login"))
+            flash("Incorrect email or password.")
     return render_template("login.html")
+
+
 
 @app.route("/logout")
 def logout():
@@ -212,6 +262,19 @@ def admin_delete_book(book_id):
     flash("Book deleted successfully", "success")
     return redirect(url_for("librarian_dashboard"))
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
 
+@app.route("/verify-otp", methods=["GET", "POST"])
+def verify_otp():
+    if request.method == "POST":
+        entered_otp = request.form["otp"]
+        if entered_otp == session.get("otp"):
+            session["user"] = session.pop("pending_user")
+            session.pop("otp", None)
+            flash("Login successful.", "success")
+            return redirect(url_for("index"))
+        else:
+            flash("Invalid OTP.", "danger")
+    return render_template("verify_otp.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
