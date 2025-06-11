@@ -12,7 +12,7 @@ load_dotenv()
 
 # Initialisation Flask
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = 'supersecretkey'
 
 # Config base de données
 basedir = os.path.abspath(os.path.dirname(__file__))
