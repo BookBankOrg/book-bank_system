@@ -1,5 +1,5 @@
+.env
+book_bank.db
 __pycache__/
 *.pyc
 instance/
-book_bank.db
-.env
